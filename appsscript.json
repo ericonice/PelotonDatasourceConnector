@@ -1,0 +1,16 @@
+{
+  "timeZone": "America/Los_Angeles",
+  "dependencies": {
+  },
+  "runtimeVersion": "V8",
+  "dataStudio": {
+    "name": "Peloton Connector v1",
+    "logoUrl": "https://raw.githubusercontent.com/npm/logos/master/npm%20logo/npm-logo-red.png",
+    "company": "Eric Newman",
+    "companyUrl": "https://developers.google.com/datastudio/",
+    "addonUrl": "https://github.com/google/datastudio/tree/master/community-connectors/npm-downloads",
+    "supportUrl": "https://github.com/google/datastudio/issues",
+    "description": "Get peloton data.",
+    "sources": ["npm"]
+  }
+}
