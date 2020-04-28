@@ -4,13 +4,13 @@
   },
   "runtimeVersion": "V8",
   "dataStudio": {
-    "name": "Peloton Connector v1",
-    "logoUrl": "https://raw.githubusercontent.com/npm/logos/master/npm%20logo/npm-logo-red.png",
+    "name": "Peloton Connector",
+    "logoUrl": "https://avatars1.githubusercontent.com/u/12620398?s=460&u=623d60a805f41473e8df768ba70a5c372adf7e0e&v=4",
     "company": "Eric Newman",
-    "companyUrl": "https://developers.google.com/datastudio/",
-    "addonUrl": "https://github.com/google/datastudio/tree/master/community-connectors/npm-downloads",
-    "supportUrl": "https://github.com/google/datastudio/issues",
-    "description": "Get peloton data.",
-    "sources": ["npm"]
+    "companyUrl": "https://github.com/ericonice/PelotonDatasourceConnector",
+    "addonUrl": "https://github.com/ericonice/PelotonDatasourceConnector",
+    "supportUrl": "https://github.com/ericonice/PelotonDatasourceConnector",
+    "description": "Google data studioo connector for Peloton workout data",
+    "sources": []
   }
 }
