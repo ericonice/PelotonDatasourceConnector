@@ -7,14 +7,14 @@
 function parseTimestamp(timestamp) {
   var date = new Date(timestamp);
 
-  var year = date.getUTCFullYear();
+  var year = date.getFullYear();
 
-  var month = date.getUTCMonth() + 1;
+  var month = date.getMonth() + 1;
   if (month < 10) {
     month = '0' + month;
   }
 
-  var day = date.getUTCDate();
+  var day = date.getDate();
   if (day < 10) {
     day = '0' + day;
   }

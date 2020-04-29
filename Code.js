@@ -176,7 +176,7 @@ function getFields() {
 
   fields.newMetric()
     .setId('avgPace')
-    .setName('Avg. Pace (km/min)')
+    .setName('Avg. Pace')
     .setType(types.NUMBER)
     .setAggregation(aggregations.AVG);
 
@@ -260,7 +260,7 @@ function getData(request) {
 
     // Get the values for the requested fields
     var rows = responseToRows(requestedFields, workoutData);
-  
+      
     console.log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
     return {
       schema: requestedFields.build(),
