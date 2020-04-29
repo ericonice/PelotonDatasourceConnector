@@ -45,16 +45,23 @@ function getConfig(request) {
 
   config.newInfo()
     .setId('instructions')
-    .setText('Enter username and password.');
+    .setText('Enter login information for Peloton acount.');
   
+  if (adminMode) {
+    config.newCheckbox()
+      .setId('useSampleData')
+      .setName('Use Sample Data')
+      .setHelpText('Select if using kilometers');
+  }
+
   config.newTextInput()
     .setId('username')
-    .setName('Enter username or email')
+    .setName('Enter username or email for Peloton account')
     .setPlaceholder('username or email');
   
   config.newTextInput()
     .setId('password')
-    .setName('Enter password')
+    .setName('Enter password for Peloton account')
     .setPlaceholder('password');
 
   config.setDateRangeRequired(false);
@@ -86,7 +93,7 @@ function getFields() {
   fields.newDimension()
     .setId('length')
     .setName('Length (min)')
-    .setType(types.NUMBER);
+    .setType(types.MINUTE);
   
   fields.newDimension()
     .setId('fitnessDiscipline')
@@ -139,13 +146,13 @@ function getFields() {
 
   fields.newMetric()
     .setId('avgSpeed')
-    .setName('Avg. Speed (kph)')
+    .setName('Avg. Speed')
     .setType(types.NUMBER)
     .setAggregation(aggregations.AVG);
 
   fields.newMetric()
     .setId('distance')
-    .setName('Distance (km)')
+    .setName('Distance')
     .setType(types.NUMBER)
     .setAggregation(aggregations.SUM);
 
@@ -173,6 +180,9 @@ function getFields() {
     .setType(types.NUMBER)
     .setAggregation(aggregations.AVG);
 
+  fields.setDefaultDimension('workoutTimestamp');
+  fields.setDefaultMetric('totalOutput');
+  
   return fields;
 }
 
@@ -181,12 +191,10 @@ function getSchema(request) {
   return { schema: fields };
 }
 
-
-
 function responseToRows(requestedFields, workoutData) {
-  // Transform parsed data and filter for requested fields
-  
+  // Transform parsed data and filter for requested fields    
   var index = 1;
+  
   return workoutData.map(function(row) {
     var values = [];
     requestedFields.asArray().forEach(function (field) {
@@ -253,6 +261,7 @@ function getData(request) {
     // Get the values for the requested fields
     var rows = responseToRows(requestedFields, workoutData);
   
+    console.log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
     return {
       schema: requestedFields.build(),
       rows: rows
@@ -285,11 +294,18 @@ function getDataUsingPelotonAPIs(request) {
       {
         "method"  : "POST",
         "contentType" : "application/json",
+        'muteHttpExceptions' : true,
         "payload" : JSON.stringify(payload)
       };
-
+  
   var authResult = UrlFetchApp.fetch(url, options);
-    
+  var rc = authResult.getResponseCode();
+  
+  // Should check for other responses, otberwise will get misleading error
+  if (rc == 401) {
+    throw 'Invalid credentials';
+  }
+  
   // Needs the peloton_session_id cookie for future invocations
   var cookies = authResult.getAllHeaders()['Set-Cookie']; 
   var cookie = cookies.filter(function (c) {
@@ -312,4 +328,30 @@ function getDataUsingPelotonAPIs(request) {
   // Convert to array, ignoring the header row
   // TODO: Use the first row to help determine data associated with each column
   return Utilities.parseCsv(data).slice(1);
+}
+
+function getSampleDataTest() {
+  try {
+    var workoutData = getDataUsingSampleData();
+  
+    var fields = getFields();
+    var requestedFieldIds = fields.build().map(function(field) {
+      return field.name;
+    });
+    console.log('Requested field IDs' + JSON.stringify(requestedFieldIds));
+
+    var requestedFields = fields.forIds(requestedFieldIds);
+
+    // Get the values for the requested fields
+    var rows = responseToRows(requestedFields, workoutData);
+  
+    console.log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length + ' columns');
+    return {
+      schema: requestedFields.build(),
+      rows: rows
+    };
+    
+  } catch(e) {
+    console.error('Error attempting to get data:' + e);
+  }
 }
