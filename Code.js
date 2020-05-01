@@ -1,6 +1,9 @@
 // Used for debugging
 const adminMode = true;
 
+// Version ID
+const version = '2020.18.1 dev';
+
 // Order of fields in csv file.  Would be better to determine this based on the first row of the csv file
 var Fields = {
   WorkoutTimestamp : 0,
@@ -27,12 +30,17 @@ function isAdminUser() {
   return adminMode;
 }
 
+function log(message) {
+  console.log(version + ':' + message);
+}
+
 function getAuthType() {
   var response = { type: 'NONE' };
   return response;
 }
 
 function getConfig(request) {
+  log('Get configuration');
   var cc = DataStudioApp.createCommunityConnector();
   var config = cc.getConfig();
   
@@ -47,13 +55,6 @@ function getConfig(request) {
     .setId('instructions')
     .setText('Enter login information for Peloton acount.');
   
-  if (adminMode) {
-    config.newCheckbox()
-      .setId('useSampleData')
-      .setName('Use Sample Data')
-      .setHelpText('Select if using kilometers');
-  }
-
   config.newTextInput()
     .setId('username')
     .setName('Enter username or email for Peloton account')
@@ -64,17 +65,30 @@ function getConfig(request) {
     .setName('Enter password for Peloton account')
     .setPlaceholder('password');
 
+  config.newInfo()
+    .setId('unitOfMeasurementInstructions')
+    .setText('Select if Peloton configured to use kilometers, not miles.');
+  
+  config.newCheckbox()
+    .setId('useKilometers')
+    .setName('Use Kilometers for Unit of Measurement')
+    .setHelpText('This is used to name the fields associated with distance, e.g. Distance (mi) vs. Distance (km)');
+
   config.setDateRangeRequired(false);
   
   return config.build();
 }
 
-function getFields() {
+function getFields(useKilometers) {
   var cc = DataStudioApp.createCommunityConnector();
   var fields = cc.getFields();
   var types = cc.FieldType;
   var aggregations = cc.AggregationType;
       
+  var unitOfMeasurement = useKilometers  
+    ? 'km' 
+    : 'mi';
+                           
   fields.newDimension()
     .setId('workoutTimestamp')
     .setName('Workout Timestamp')
@@ -93,7 +107,7 @@ function getFields() {
   fields.newDimension()
     .setId('length')
     .setName('Length (min)')
-    .setType(types.MINUTE);
+    .setType(types.NUMBER);
   
   fields.newDimension()
     .setId('fitnessDiscipline')
@@ -146,13 +160,13 @@ function getFields() {
 
   fields.newMetric()
     .setId('avgSpeed')
-    .setName('Avg. Speed')
+    .setName('Avg. Speed (' + unitOfMeasurement.charAt(0) + 'ph)')
     .setType(types.NUMBER)
     .setAggregation(aggregations.AVG);
 
   fields.newMetric()
     .setId('distance')
-    .setName('Distance')
+    .setName('Distance (' + unitOfMeasurement + ')')
     .setType(types.NUMBER)
     .setAggregation(aggregations.SUM);
 
@@ -176,7 +190,7 @@ function getFields() {
 
   fields.newMetric()
     .setId('avgPace')
-    .setName('Avg. Pace')
+    .setName('Avg. Pace (min/' + unitOfMeasurement + ')')
     .setType(types.NUMBER)
     .setAggregation(aggregations.AVG);
 
@@ -187,7 +201,9 @@ function getFields() {
 }
 
 function getSchema(request) {
-  var fields = getFields().build();
+  log('Get schema');
+  log('Get sample data:' + request.configParams.useSampleData);
+  var fields = getFields(request.configParams.useKilometers).build();
   return { schema: fields };
 }
 
@@ -248,6 +264,7 @@ function responseToRows(requestedFields, workoutData) {
   
 function getData(request) {
   try {
+    log('Getting data for request:' + JSON.stringify(request, 0, 2));
     var workoutData = request.configParams.useSampleData 
       ? getDataUsingSampleData() 
       : getDataUsingPelotonAPIs(request);
@@ -255,13 +272,14 @@ function getData(request) {
     var requestedFieldIds = request.fields.map(function(field) {
       return field.name;
     });
-    var requestedFields = getFields().forIds(requestedFieldIds);
-    console.log('Requested field IDs' + JSON.stringify(requestedFieldIds));
+    
+    var requestedFields = getFields(request.configParams.useKilometers).forIds(requestedFieldIds);
+    log('Requested field IDs' + JSON.stringify(requestedFieldIds));
 
     // Get the values for the requested fields
     var rows = responseToRows(requestedFields, workoutData);
       
-    console.log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
+    log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
     return {
       schema: requestedFields.build(),
       rows: rows
@@ -274,14 +292,12 @@ function getData(request) {
 }
 
 function getDataUsingSampleData(request) {
-  console.log('Getting data using sample data');
   return Utilities.parseCsv(sampleData).slice(1);
 }
 
 function getDataUsingPelotonAPIs(request) {
   var username = request.configParams.username;
   var password = request.configParams.password;
-  console.log('Getting data for user');
   
   // First get the user_id and cookie needed to invoke the API to get the workout data
   var url = 'https://api.onepeloton.com/auth/login'
@@ -334,18 +350,18 @@ function getSampleDataTest() {
   try {
     var workoutData = getDataUsingSampleData();
   
-    var fields = getFields();
+    var fields = getFields(false);
     var requestedFieldIds = fields.build().map(function(field) {
       return field.name;
     });
-    console.log('Requested field IDs' + JSON.stringify(requestedFieldIds));
+    log('Requested field IDs' + JSON.stringify(requestedFieldIds));
 
     var requestedFields = fields.forIds(requestedFieldIds);
 
     // Get the values for the requested fields
     var rows = responseToRows(requestedFields, workoutData);
   
-    console.log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length + ' columns');
+    log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length + ' columns');
     return {
       schema: requestedFields.build(),
       rows: rows
