@@ -34,6 +34,10 @@ function log(message) {
   console.log(version + ':' + message);
 }
 
+function error(message) {
+  console.error(version + ':' + message);
+}
+
 function getAuthType() {
   var response = { type: 'NONE' };
   return response;
@@ -264,7 +268,11 @@ function responseToRows(requestedFields, workoutData) {
   
 function getData(request) {
   try {
-    log('Getting data for request:' + JSON.stringify(request, 0, 2));
+    log('Getting data for request:\n' 
+      + 'User: ' + maskUsernameOrEmail(request.configParams.username) + '\n'
+      + 'Script Params: ' + JSON.stringify(request.scriptParams, 0, 2) + '\n'
+      + 'Fields: ' + JSON.stringify(request.fields, 0, 2));
+    
     var workoutData = request.configParams.useSampleData 
       ? getDataUsingSampleData() 
       : getDataUsingPelotonAPIs(request);
@@ -286,7 +294,7 @@ function getData(request) {
     };
     
   } catch(e) {
-    console.error('Error attempting to get data:' + e);
+    error('Error attempting to get data:' + e);
     throw e;
   }
 }
@@ -368,6 +376,7 @@ function getSampleDataTest() {
     };
     
   } catch(e) {
-    console.error('Error attempting to get data:' + e);
+    error('Error attempting to get data:' + e);
+    throw e;
   }
 }
