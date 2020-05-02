@@ -21,3 +21,14 @@ function parseTimestamp(timestamp) {
 
   return '' + year + month + day;
 }
+
+function maskUsernameOrEmail(data) {
+  if ((data == null) || (data.length < 3)) {
+    return '****';
+  }
+  
+  var split = data.split('@');
+  var name = split[0]; 
+  split[0] = name.substr(0,1) +  new Array(split[0].length - 2).fill('*').join('') + name.substr(name.length - 1,1);
+  return split.join('@');
+}
