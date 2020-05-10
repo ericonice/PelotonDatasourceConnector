@@ -11,6 +11,7 @@
     "addonUrl": "https://github.com/ericonice/PelotonDatasourceConnector",
     "supportUrl": "https://github.com/ericonice/PelotonDatasourceConnector",
     "description": "Google data studioo connector for Peloton workout data",
-    "sources": []
+    "authType": ["USER_PASS"],
+    "sources": ["Peloton"]
   }
 }

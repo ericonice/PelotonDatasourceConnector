@@ -138,68 +138,58 @@ function getFields(useKilometers) {
     .setName('Record Count')
     .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('totalOutput')
     .setName('Total Output')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.SUM);
+    .setType(types.NUMBER);
   
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgWatts')
     .setName('Avg. Watts')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgResistance')
     .setName('Avg. Resistance')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
   
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgCadence')
     .setName('Avg. Cadence (RPM)')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgSpeed')
     .setName('Avg. Speed (' + unitOfMeasurement.charAt(0) + 'ph)')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('distance')
     .setName('Distance (' + unitOfMeasurement + ')')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.SUM);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('calories')
     .setName('Calories')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.SUM);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgHeartrate')
     .setName('Avg. Heartrate')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgIncline')
     .setName('Avg. Incline')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
-  fields.newMetric()
+  fields.newDimension()
     .setId('avgPace')
     .setName('Avg. Pace (min/' + unitOfMeasurement + ')')
-    .setType(types.NUMBER)
-    .setAggregation(aggregations.AVG);
+    .setType(types.NUMBER);
 
   fields.setDefaultDimension('workoutTimestamp');
-  fields.setDefaultMetric('totalOutput');
+  //fields.setDefaultMetric('totalOutput');
   
   return fields;
 }
