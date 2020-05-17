@@ -2,7 +2,7 @@
 const adminMode = true;
 
 // Version ID
-const version = '2020.18.1 dev';
+const version = '2020.20.3 Production';
 
 // Order of fields in csv file.  Would be better to determine this based on the first row of the csv file
 var Fields = {
@@ -36,6 +36,10 @@ function log(message) {
 
 function error(message) {
   console.error(version + ':' + message);
+}
+
+function warn(message) {
+  console.warn(version + ':' + message);
 }
 
 function getAuthType() {
@@ -206,18 +210,20 @@ function getFields(useKilometers) {
 
 function getSchema(request) {
   log('Get schema');
-  log('Get sample data:' + request.configParams.useSampleData);
   var fields = getFields(request.configParams.useKilometers).build();
   return { schema: fields };
 }
 
 function responseToRows(requestedFields, workoutData) {
-  // Transform parsed data and filter for requested fields    
+  // For record count
   var index = 1;
+    
+  var fields = requestedFields.asArray();
   
+  // Transform parsed data and filter for requested fields    
   return workoutData.map(function(row) {
     var values = [];
-    requestedFields.asArray().forEach(function (field) {
+    fields.forEach(function (field) {
       switch (field.getId()) {
         case 'recordCount':
           return values.push(index++);
@@ -259,7 +265,7 @@ function responseToRows(requestedFields, workoutData) {
           return values.push(row[Fields.AvgPace]);
         default:
           return row.push('');
-      }
+      }        
     });
     
     return { values: values };
@@ -267,8 +273,9 @@ function responseToRows(requestedFields, workoutData) {
 }
   
 function getData(request) {
+  var id = '(' + Utilities.getUuid() + '):';
   try {
-    log('Getting data for request:\n' 
+    log(id + 'Getting data for request:\n' 
       + 'User: ' + maskUsernameOrEmail(request.configParams.username) + '\n'
       + 'Script Params: ' + JSON.stringify(request.scriptParams, 0, 2) + '\n'
       + 'Fields: ' + JSON.stringify(request.fields, 0, 2));
@@ -282,19 +289,19 @@ function getData(request) {
     });
     
     var requestedFields = getFields(request.configParams.useKilometers).forIds(requestedFieldIds);
-    log('Requested field IDs' + JSON.stringify(requestedFieldIds));
+    log(id + 'Requested field IDs' + JSON.stringify(requestedFieldIds));
 
     // Get the values for the requested fields
     var rows = responseToRows(requestedFields, workoutData);
       
-    log('Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
+    log(id + 'Successfully fetched ' + rows.length + ' rows for ' + requestedFieldIds.length +' columns');
     return {
       schema: requestedFields.build(),
       rows: rows
     };
     
   } catch(e) {
-    error('Error attempting to get data:' + e);
+    error(id + 'Error attempting to get data:' + e);
     throw e;
   }
 }
