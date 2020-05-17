@@ -32,3 +32,13 @@ function maskUsernameOrEmail(data) {
   split[0] = name.substr(0,1) +  new Array(split[0].length - 2).fill('*').join('') + name.substr(name.length - 1,1);
   return split.join('@');
 }
+
+function validateFields(fields) {  
+  fields.asArray().forEach(function (field) {
+    try {
+      log('(Field Id, Field Name) => (' + field.getId() + ',' + field.getName() + ')');
+    } catch (exception) {
+      warn('Unable to get field Id for field:' + field);
+    }
+  });
+}
